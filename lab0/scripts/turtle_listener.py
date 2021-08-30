@@ -8,9 +8,13 @@ from turtlesim.msg import Pose
 def pose_callback(data):
     rospy.loginfo('x: %f, y: %f',data.x, data.y)
 
-def turtle_pose_listener():
 
-    # In ROS, nodes are uniquely named. If two nodes with the same
+if __name__ == '__main__':
+    # this is the "main" for python, and is what will be called when 
+    # we run the node. Here we want to call the turtle pose 
+    # listener.
+    
+     # In ROS, nodes are uniquely named. If two nodes with the same
     # name are launched, the previous one is kicked off. The
     # anonymous=True flag means that rospy will choose a unique
     # name for our 'listener' node so that multiple listeners can
@@ -28,9 +32,3 @@ def turtle_pose_listener():
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
-
-if __name__ == '__main__':
-    # this is the "main" for python, and is what will be called when 
-    # we run the node. Here we want to call the turtle pose 
-    # listener.
-    turtle_pose_listener()
