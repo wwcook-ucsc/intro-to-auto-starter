@@ -4,7 +4,7 @@ import rospy
 import numpy as np
 from std_msgs.msg import String, Float32
 from sensor_msgs.msg import LaserScan
-from lab1.msg import ScanRange
+from lab2.msg import ScanRange
 
 
 class LaserScanNode():

@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
-<<<<<<< HEAD:lab2/CMakeLists.txt
 project(lab2)
-=======
-project(lab1)
->>>>>>> c32923fe56851cc6701a864ed22c0559c2c502d3:lab2/CMakeLists.txt
+
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
