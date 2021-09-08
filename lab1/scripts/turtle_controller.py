@@ -16,7 +16,7 @@ class TurtleController():
     # attributes of the class and setup other important structures. 
     # The 'self' keyword allows us to create variables inside our
     # class scope, so all of our functions are able to access them. We 
-    # pass 'self' as a parameter to all our functions to gain access 
+    # specify 'self' as a parameter to all our functions to gain access 
     # to the self scope, but the parameter is passed automatically 
     # when python runs.
     def __init__(self):
@@ -40,9 +40,7 @@ class TurtleController():
         # We add _pub to our variables to indicate they are Publishers
         self.cmd_vel_pub = rospy.Publisher("/turtle1/cmd_vel", Twist, queue_size=10)
 
-        self.pose = None
-        self.pose_sub = rospy.Subscriber('/turtle1/pose', Pose, self.pose_callback)
-    
+
         # We initialize the Twist message data structure like so:
         move_twst = Twist()
         # The twist message, as we saw in the prelab, has a linear and angular component (Vector3),
@@ -65,7 +63,6 @@ class TurtleController():
         rate = rospy.Rate(10)
         rospy.loginfo('Set Rate to 10hz')
 
-        start = rospy.get_time()
         # We can run the main loop of the Node while we don't get a Ctrl+C input
         while not rospy.is_shutdown():
             
@@ -97,3 +94,4 @@ if __name__ == "__main__":
         rospy.logerr(e)
     except:
         rospy.loginfo("End of turtle_controller")
+        
