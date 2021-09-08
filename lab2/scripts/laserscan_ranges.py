@@ -11,8 +11,9 @@ class LaserScanNode():
     def __init__(self):
         
         # create a publisher handle to publish ScanRange messages to the 
-        # laserscan_range topic.
-        self.scan_range_pub = rospy.Publisher('laserscan_range', ScanRange, queue_size=10)
+        # laserscan_range topic. Make sure you use self.var_name = xyz so
+	# that you are able to use this handle in your other functions
+       	"""ADD PUBLISHER HANDLER HERE""""
         
         # subscriber handle for the scan message. This handle 
         # will subscribe to scan and recieve LaserScan messages. Each
@@ -22,24 +23,24 @@ class LaserScanNode():
         # initialize and register this node with the ROS master node
         rospy.init_node('laserscan_listen', anonymous=False)
         
-        # use this instance of the scan range message to store your closest and farthest
+        # Create an instance of the scan range message to store your closest and farthest
         # points. Remember, these attributes can be accesed with:
         # self.scan_range.closest_point. Also note the attributes are set to default values
         # currently.
-        self.scan_range = ScanRange()
+       	""" CREATE INSTANCE OF MESSAGE HERE"""
     
     # this is the callback for the scan message. 
-    # here we will use the data parameter to access the ranges 
+    # here we will use the scan_data parameter to access the ranges 
     # from the LaserScan message and figure out the closest and farthest point
-    def scan_callback(self, data):
-        """ADD CODE HERE"""
+    def scan_callback(self, scan_data):
+        """ADD CALLBACK CODE HERE"""
         pass
 
     # the publish method is  called on an interval in the main
     # loop of this file. This is where we publish our ranges to 
-    # the topic 
+    # the topic. 
     def publish(self):
-        """ADD CODE HERE"""
+        """ADD PUBLISHER CODE HERE"""
         pass
         
 
@@ -48,9 +49,9 @@ if __name__ == '__main__':
 
     rate = rospy.Rate(10) # 10hz
     try:
-        while not rospy.is_shutdown():
-            ls.publish()
-            rate.sleep()
+	# Add a while loop which calls the publish() function of the laser scan node
+	# on the interval we have defined
+	""" CREATE PUBLISHER LOOP HERE """
 
     except rospy.ROSInterruptException:
         pass
