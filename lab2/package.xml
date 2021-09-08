@@ -1,8 +1,14 @@
 <?xml version="1.0"?>
 <package format="2">
+<<<<<<< HEAD:lab2/package.xml
   <name>lab2</name>
   <version>0.0.0</version>
   <description>The lab2 package</description>
+=======
+  <name>lab1</name>
+  <version>0.0.0</version>
+  <description>The lab1 package</description>
+>>>>>>> c32923fe56851cc6701a864ed22c0559c2c502d3:lab2/package.xml
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
