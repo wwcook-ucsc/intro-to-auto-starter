@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="talker" pkg="lab4-launch-sample" type="talker.py" output="screen"/>
+
+	<node name="listener" pkg="lab4-launch-sample" type="listener.py" output="screen"/>
+</launch>
