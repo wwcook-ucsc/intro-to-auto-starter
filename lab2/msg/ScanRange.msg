@@ -1,0 +1,4 @@
+float32 nearest_angle
+float32 nearest_distance
+float32 farthest_angle
+float32 farthest_distance
