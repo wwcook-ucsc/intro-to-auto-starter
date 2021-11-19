@@ -8,7 +8,10 @@ import numpy as np
 
 class GapFinder(object):
 
-    def __init__(self, car_width, disparity_threshold, fov=270, min_fov=120, angle_rate=1.0, blinder_amount=0.0):
+    DISPARITY = 0
+    AVOIDANCE = 1
+
+    def __init__(self, car_width, disparity_threshold=0.5, fov=270, min_fov=120, angle_rate=1.0, blinder_amount=0.0, method=0):
         """
         :param car_width: width of car, used for dilating obstacles
         :param disparity_threshold: difference between consecutive ranges to
@@ -22,6 +25,9 @@ class GapFinder(object):
         self.fov = fov * np.pi / 180.0
         self.min_fov = min_fov * np.pi / 180.0
         self.blinder_amount = blinder_amount
+
+        if not method in {0, 1}:
+            raise ValueError('invalid method')
 
         self.avg_ang_vel = 0.0
         self.ang_vel_rate = angle_rate
@@ -38,7 +44,10 @@ class GapFinder(object):
 
         self.odom_subscriber = rospy.Subscriber('/odom', Odometry, self.odom_callback)
 
-        rospy.loginfo('gap_finder running')
+        if method == self.DISPARITY:
+            rospy.loginfo('gap_finder running disparity method')
+        elif method == self.AVOIDANCE:
+            rospy.loginfo('gap_finder running obstacle avoidance method')
 
         self.rate = rospy.Rate(10)
 
@@ -48,7 +57,10 @@ class GapFinder(object):
                 continue
 
             data = self.get_latest_scan()
-            self.run_disparity_loop(data)
+            if method == self.DISPARITY:
+                self.run_disparity_loop(data)
+            elif method == self.AVOIDANCE:
+                self.run_avoidance_loop(data)
 
             self.rate.sleep()
     
@@ -80,7 +92,9 @@ class GapFinder(object):
         return data
     
     def run_disparity_loop(self, data):
-        ranges = np.array(self.scan.ranges, dtype='float32')
+        """Runs a single timestep of the disparity method.
+        """
+        ranges = np.array(data.ranges, dtype='float32')
 
         angle_min, angle_inc = data.angle_min, data.angle_increment
         filtered_ranges = self.erode_gaps(ranges, angle_inc)
@@ -98,7 +112,7 @@ class GapFinder(object):
         else:  # turning right
             new_angle_min -= self.avg_ang_vel * self.blinder_amount
             new_angle_min = min(-0.5 * self.min_fov, new_angle_min)
-#        print('fov min, max:', (new_angle_min, new_angle_max))
+        # print('fov min, max:', (new_angle_min, new_angle_max))
         filtered_ranges, angle_min, angle_max = self.limit_fov(
             filtered_ranges, new_angle_min, new_angle_max, angle_min, angle_inc)
         # print('new_angle_min, new_angle_inc:', (angle_min, angle_inc))
@@ -106,6 +120,48 @@ class GapFinder(object):
         target_angle = self.index2angle(target_range_i, angle_min, angle_inc)
         # print('target angle, distance:', (target_angle * 180. / np.pi,
         #                                   filtered_ranges[target_range_i]))
+
+        self.pid_input_msg.steering_error = target_angle
+        self.pid_input_msg.target_speed = 2.5
+        self.pid_input_publisher.publish(self.pid_input_msg)
+
+        data.ranges = list(filtered_ranges)
+        data.angle_min = angle_min
+        data.angle_increment = angle_inc
+        data.angle_max = angle_min + angle_inc * len(data.ranges)
+        self.filtered_scan_publisher.publish(data)
+    
+    def run_avoidance_loop(self, data):
+        """Runs a single timestep of the obstacle avoidance method.
+        """
+        ranges = np.array(data.ranges, dtype='float32')
+
+        angle_min, angle_inc = data.angle_min, data.angle_increment
+
+        ranges, angle_min, angle_max = self.limit_fov(
+            ranges, -0.5 * self.fov, 0.5 * self.fov, angle_min, angle_inc)
+
+        i = np.argmin(ranges)
+        dist = ranges[i]
+        half_window_size_rads = self.half_width / dist
+        half_window_size = half_window_size_rads / angle_inc
+        half_window_size = int(np.ceil(half_window_size))
+        min_i = i - half_window_size
+        max_i = i + half_window_size + 1
+        filtered_ranges = ranges.copy()
+        filtered_ranges[min_i:max_i] = 0.0
+
+        # right_angle = self.index2angle(min_i, angle_min, angle_inc)
+        # left_angle = self.index2angle(max_i, angle_min, angle_inc)
+        # target_angle = 0.0
+        # if right_angle < target_angle and target_angle < left_angle:
+        #     if abs(right_angle) < abs(left_angle):
+        #         target_angle = right_angle
+        #     else:
+        #         target_angle = left_angle
+
+        target_angle = self.index2angle(np.argmax(filtered_ranges),
+                                          angle_min, angle_inc)
 
         self.pid_input_msg.steering_error = target_angle
         self.pid_input_msg.target_speed = 2.5
@@ -155,14 +211,20 @@ class GapFinder(object):
 if __name__ == '__main__':
     try:
         GapFinder(
-            car_width=1.5,
+            car_width=0.75,
             disparity_threshold=0.5,
-#            disparity_threshold=0.0,  # dilates all obstacles. do not use with blinder
+#            disparity_threshold=0.0,  # dilates all obstacles. not effective with blinders
             fov=210.0,
             min_fov=150.0,
             angle_rate=0.02,
-            blinder_amount=0.5,
+            blinder_amount=0.5,  # uses "blinders" to dynamically limit FOV and avoid U-turns
+            method=GapFinder.DISPARITY,
         )
+        # GapFinder(
+        #     car_width=2.0,
+        #     fov=210.0,
+        #     method=GapFinder.AVOIDANCE,
+        # )
     except KeyboardInterrupt:
         pass
     except Exception as e:
