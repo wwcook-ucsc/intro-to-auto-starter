@@ -18,7 +18,9 @@ class GapFinder(object):
                                     consider a disparity
         :param fov: LiDAR field of view to keep. None for default fov given by /scan.
         :param min_fov: minimum LiDAR field of view at all times
+        :param angle_rate: weight in exponential running average for angular velocity
         :param blinder_amount: amount of erosion to apply to FOV when turning
+        :param method: which FtG method to use: {DISPARITY, AVOIDANCE}
         """
         self.half_width = car_width * 0.5
         self.disp_thresh = disparity_threshold
@@ -213,11 +215,11 @@ if __name__ == '__main__':
         GapFinder(
             car_width=0.75,
             disparity_threshold=0.5,
-#            disparity_threshold=0.0,  # dilates all obstacles. not effective with blinders
+#            disparity_threshold=0.0,  # dilates all obstacles. less effective with blinders
             fov=210.0,
             min_fov=150.0,
             angle_rate=0.02,
-            blinder_amount=0.5,  # uses "blinders" to dynamically limit FOV and avoid U-turns
+            blinder_amount=0.5,  # uses "blinders" to dynamically limit FOV to avoid U-turns
             method=GapFinder.DISPARITY,
         )
         # GapFinder(
