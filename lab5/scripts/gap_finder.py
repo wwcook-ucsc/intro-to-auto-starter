@@ -159,9 +159,9 @@ if __name__ == '__main__':
             disparity_threshold=0.5,
 #            disparity_threshold=0.0,  # dilates all obstacles. do not use with blinder
             fov=210.0,
-            min_fov=120.0,
-            angle_rate=0.03,
-            blinder_amount=0.6,
+            min_fov=150.0,
+            angle_rate=0.02,
+            blinder_amount=0.5,
         )
     except KeyboardInterrupt:
         pass
