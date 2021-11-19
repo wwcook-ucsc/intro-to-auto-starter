@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="gap_finder" pkg="lab5" type="gap_finder.py" output="screen"/>
+    <node name="car_control" pkg="lab5" type="car_control.py" output="screen"/>
+</launch>
